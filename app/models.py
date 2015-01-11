@@ -35,7 +35,7 @@ class Monkey(db.Model):
 
 
     def __repr__(self): #this method is used for debugging
-        return '<Monkey %r>' % (self.name)
+        return '<Monkey {}>'.format(self.name)
 
     def is_friend(self, monkey):
         return self.friends.filter(
@@ -43,7 +43,7 @@ class Monkey(db.Model):
         ).count() > 0
 
     def add_friend(self, monkey):
-        if not self.is_friend(monkey):
+        if self != monkey and not self.is_friend(monkey):
             self.friends.append(monkey)
             monkey.friends.append(self)
             return True
@@ -57,3 +57,18 @@ class Monkey(db.Model):
             return True
         else:
             return False
+
+    def add_best_friend(self, monkey):
+        if self != monkey and self.best_friend != monkey:
+            if not self.is_friend(monkey):
+                self.add_friend(monkey)
+            self.best_friend = monkey
+            return True
+        else:
+            return False
+
+    def clear_best_friend(self):
+        if self.best_friend:
+            self.best_friend = None
+            return True
+        return False

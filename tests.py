@@ -26,6 +26,7 @@ class TestMonkey(TestCase):
         assert m1.is_friend(m2) is False
         assert m2.is_friend(m1) is False
         assert m1.delete_friend(m2) is False
+        assert m1.add_friend(m1) is False
         assert m1.add_friend(m2) is True
         db.session.add_all([m1, m2])
         db.session.commit()
@@ -87,6 +88,42 @@ class TestMonkey(TestCase):
         assert m2.is_friend(m3) is False
         assert m3.is_friend(m1) is False
         assert m3.is_friend(m2) is False
+
+    def test_best_friends(self):
+        m1 = models.Monkey(name='monkey1', email='monkey1@example.com')
+        m2 = models.Monkey(name='monkey2', email='monkey2@example.com')
+        m3 = models.Monkey(name='monkey3', email='monkey3@example.com')
+        db.session.add_all([m1, m2, m3])
+        db.session.commit()
+
+        assert m1.best_friend is None
+        assert m2.best_friend is None
+        assert m3.best_friend is None
+
+        assert m1.add_best_friend(m1) is False
+        assert m1.add_best_friend(m3) is True
+        assert m2.add_best_friend(m3) is True
+        db.session.add_all([m1, m2, m3])
+        db.session.commit()
+
+        assert m1.best_friend == m3
+        assert m3.best_friend_of.count() == 2
+        assert m3.best_friend is None
+
+        assert m1.add_best_friend(m2) is True
+        db.session.add_all([m1, m2, m3])
+        db.session.commit()
+        assert m3.best_friend_of.count() == 1
+
+        assert m1.clear_best_friend() is True
+        assert m2.clear_best_friend() is True
+        assert m3.clear_best_friend() is False
+        db.session.add_all([m1, m2, m3])
+        db.session.commit()
+
+        assert m1.best_friend is None
+        assert m2.best_friend is None
+        assert m3.best_friend is None
 
 
 if __name__ == '__main__':
