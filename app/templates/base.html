@@ -1,0 +1,39 @@
+{% extends "bootstrap/base.html" %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet"
+href="{{url_for('.static', filename='style.css')}}">
+{% endblock %}
+{% block title %}{% endblock %}
+{% block navbar %}
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+          <span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#">Add Monkey</a></li>
+          <li><a href="#">About</a></li>
+        </ul>
+      </li>
+    </ul>
+    <a class="navbar-brand monkey-brand" href="#">Monkeys</a>
+  </div>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+{% block innercontent %}{% endblock %}
+</div>
+<footer class="footer">
+  <div class="container-fluid">
+    <p class="text-muted">@ 2015 Maria Klepikova</p>
+  </div>
+</footer>
+{% endblock %}
+{% block scripts %}
+{{super()}}
+{% endblock %}
