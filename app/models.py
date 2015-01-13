@@ -1,4 +1,5 @@
 from app import db
+from hashlib import md5
 
 
 friendship = db.Table('friendship',
@@ -33,9 +34,13 @@ class Monkey(db.Model):
         lazy='dynamic'
     )
 
-
     def __repr__(self): #this method is used for debugging
         return '<Monkey {}>'.format(self.name)
+
+    def avatar(self, size):
+        return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(
+            self.email.encode('utf-8')).hexdigest(), size
+        )
 
     def is_friend(self, monkey):
         return self.friends.filter(
@@ -72,3 +77,9 @@ class Monkey(db.Model):
             self.best_friend = None
             return True
         return False
+
+    def friends_without_best(self):
+        if self.best_friend is not None:
+            return self.friends.filter(Monkey.id != self.best_friend.id)
+        else:
+            return self.friends.all()

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block innercontent %}
+<div class="flex-container">
+  <div class="left-side">
+    <img class="avatar" src="{{ monkey.avatar(200) }}">
+      <ul>
+        <li>name: {{ monkey.name }}</li>
+        <li>email: {{ monkey.email }}</li>
+      </ul>
+      <a class="btn btn-default">
+        <span class="fa fa-pencil fa-fw"></span>
+        &nbsp; Edit monkey
+      </a>
+      <a class="btn btn-default">
+        <span class="fa fa-times fa-fw"></span>
+        &nbsp; Delete monkey
+      </a>
+  </div>
+  <div class="info">
+    <a class="btn btn-default">
+      <span class="fa fa-plus fa-fw"></span>
+      &nbsp; Add friend
+    </a>
+    <h1>{{ monkey.friends.count() }} Friends</h1>
+    <ul class="friends-row">
+      {% if monkey.best_friend %}
+      <li class="friends-item">
+      <a href="{{ url_for('profile', id=monkey.best_friend.id) }}"><img src="{{ monkey.best_friend.avatar(150) }}"></a>
+      <span><span class="fa fa-bookmark fa-fw"></span>{{ monkey.best_friend.name }}</span>
+      <span>{{ monkey.best_friend.email }}</span>
+      <span>{{ monkey.best_friend.friends.count() }} friends</span>
+      <a class="btn btn-default">
+        <span class="fa fa-bookmark fa-fw"></span>
+        &nbsp; Delete best friend
+      </a>
+      <a class="btn btn-default">
+        <span class="fa fa-times fa-fw"></span>
+        &nbsp; Delete friend
+      </a>
+      </li>
+      {% endif %}
+      {% for friend in monkey.friends_without_best() %}
+      <li class="friends-item">
+      <a href="{{ url_for('profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
+      <span>{{ friend.name }}</span>
+      <span>{{ friend.email }}</span>
+      <span>{{ friend.friends.count() }} friends</span>
+      <a class="btn btn-default">
+        <span class="fa fa-bookmark-o fa-fw"></span>
+        &nbsp; Add best friend
+      </a>
+      <a href="{{ url_for('unfriend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default">
+        <span class="fa fa-times fa-fw"></span>
+        &nbsp; Delete friend
+      </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

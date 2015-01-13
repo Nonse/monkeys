@@ -2,38 +2,40 @@
 
 {% block styles %}
 {{super()}}
-<link rel="stylesheet"
-href="{{url_for('.static', filename='style.css')}}">
+<link href='http://fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('.static', filename='style.css')}}">
 {% endblock %}
+
 {% block title %}{% endblock %}
-{% block navbar %}
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
-    <ul class="nav navbar-nav">
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-          <span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span>
-        </a>
-        <ul class="dropdown-menu" role="menu">
-          <li><a href="#">Add Monkey</a></li>
-          <li><a href="#">About</a></li>
-        </ul>
-      </li>
-    </ul>
-    <a class="navbar-brand monkey-brand" href="#">Monkeys</a>
-  </div>
-</nav>
-{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-{% block innercontent %}{% endblock %}
-</div>
-<footer class="footer">
-  <div class="container-fluid">
-    <p class="text-muted">@ 2015 Maria Klepikova</p>
-  </div>
-</footer>
+<ul class="navigation">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+      <span class="fa fa-bars fa-fw"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu">
+    <li><a href="{{ url_for('create_monkey') }}">Add Monkey</a></li>
+    </ul>
+  </li>
+  <li><a href="#">About</a></li>
+</ul>
+<article class="main">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="messages">
+    {% for message in messages %}
+      <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+  {% block innercontent %}{% endblock %}
+</article>
+<footer class="footer">@2015 Maria Klepikova</footer>
 {% endblock %}
+
 {% block scripts %}
 {{super()}}
 {% endblock %}
