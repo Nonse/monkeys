@@ -1,0 +1,20 @@
+<a href="{{ url_for('profile', id=monkey.id) }}" class="btn btn-default">
+  <span class="fa fa-chevron-left fa-fw"></span>
+  &nbsp; Cancel
+</a>
+<h1>Adding Friends</h1>
+
+<ul class="friends-row">
+  {% for friend in monkey.non_friends() %}
+  <li class="friends-item">
+    <a href="{{ url_for('profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
+    <span>{{ friend.name }}</span>
+    <span>{{ friend.email }}</span>
+    <span>{{ friend.friends.count() }} friends</span>
+    <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default">
+      <span class="fa fa-plus fa-fw"></span>
+      &nbsp; Add friend
+    </a>
+  </li>
+  {% endfor %}
+</ul>
