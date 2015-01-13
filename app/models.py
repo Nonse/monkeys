@@ -57,12 +57,13 @@ class Monkey(db.Model):
 
     def delete_friend(self, monkey):
         if self.is_friend(monkey):
+            # to be best friends
+            # monkeys must be at least friends
             if self.best_friend == monkey:
-                self.clear_best_friend()
+                self.best_friend = None
             if monkey.best_friend == self:
-                # to be best friends
-                # monkeys must be at least friends
-                monkey.clear_best_friend()
+                monkey.best_friend = None
+
             self.friends.remove(monkey)
             monkey.friends.remove(self)
             return True
@@ -77,12 +78,6 @@ class Monkey(db.Model):
             return True
         else:
             return False
-
-    def clear_best_friend(self):
-        if self.best_friend:
-            self.best_friend = None
-            return True
-        return False
 
     def friends_without_best(self):
         if self.best_friend is not None:

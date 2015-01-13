@@ -96,3 +96,29 @@ def unfriend(id, friend_id):
     else:
         flash('Unfriending failed')
     return redirect(url_for('profile', id=monkey.id))
+
+
+@app.route('/add_bf/<id>/<friend_id>')
+def add_bf(id, friend_id):
+    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    friend = models.Monkey.query.filter_by(id=friend_id).scalar()
+    if monkey.add_best_friend(friend):
+        db.session.add_all([monkey, friend])
+        db.session.commit()
+        flash("{} is now {}'s best friend".format(friend.name, monkey.name))
+    else:
+        flash('Failed to add {} as the best friend'.format(friend.name))
+    return redirect(url_for('profile', id=monkey.id))
+
+
+@app.route('/remove_bf/<id>')
+def remove_bf(id):
+    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    friend = monkey.best_friend
+    monkey.best_friend = None
+    db.session.add(monkey)
+    db.session.commit()
+    flash("{} is not {}'s best friend anymore".format(
+        friend.name, monkey.name)
+    )
+    return redirect(url_for('profile', id=monkey.id))
