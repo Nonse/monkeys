@@ -1,11 +1,13 @@
 from flask import render_template, redirect, url_for, abort, flash, request
 from app import app, models
-from .forms import CreateMonkeyForm
+from .forms import CreateMonkeyForm, EditMonkeyForm
 from .models import Monkey, db
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/monkey/<id>')
 def profile(id):
@@ -15,6 +17,7 @@ def profile(id):
     return render_template('profile.html',
                            monkey=monkey)
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -22,7 +25,7 @@ def page_not_found(e):
 @app.route('/create', methods=['GET', 'POST'])
 def create_monkey():
     form = CreateMonkeyForm()
-    if request.method == 'POST':
+    if form.validate_on_submit():
         monkey = Monkey()
         monkey.name = form.name.data
         monkey.email = form.email.data
@@ -30,13 +33,39 @@ def create_monkey():
         db.session.commit()
         flash('Monkey created!')
         return redirect(url_for('profile', id=monkey.id))
-    else:
-        form.name.data = 'name'
-        form.email.data = 'email'
     return render_template('create.html',
                             form=form)
 
-@app.route('/delete/monkey/<id>/<friend_id>')
+
+@app.route('/edit/<id>', methods=['GET', 'POST'])
+def edit_monkey(id):
+    form = EditMonkeyForm()
+    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    if form.validate_on_submit():
+        monkey.name = form.name.data
+        monkey.email = form.email.data
+        db.session.add(monkey)
+        db.session.commit()
+        flash('Monkey edited!')
+        return redirect(url_for('profile', id=monkey.id))
+    else:
+        form.name.data = monkey.name
+        form.email.data = monkey.email
+    return render_template('edit.html',
+                            form=form,
+                            monkey=monkey)
+
+
+@app.route('/delete/<id>')
+def delete_monkey(id):
+    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    db.session.delete(monkey)
+    db.session.commit()
+    flash('You just deleted ' + monkey.name)
+    return redirect(url_for('index'))
+
+
+@app.route('/unfriend/<id>/<friend_id>')
 def unfriend(id, friend_id):
     monkey = models.Monkey.query.filter_by(id=id).scalar()
     friend = models.Monkey.query.filter_by(id=friend_id).scalar()

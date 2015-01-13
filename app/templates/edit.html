@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block innercontent %}
+<h1>Edit Monkey!</h1>
+<form action="{{ url_for('edit_monkey', id=monkey.id) }}" method="POST" name="EditMonkey">
+      {{ form.hidden_tag() }}
+      <p>Monkey name<br>
+       {{ form.name(size=50) }}<br>
+      </p>
+      <p>{{ form.email }} Monkey email</p>
+      <input type="submit" value="Save">
+  </form>
+
+{% endblock %}
