@@ -10,17 +10,24 @@ def index():
 
 
 @app.route('/monkey/<id>')
-def profile(id):
+def profile(id, add_friends=False):
     monkey = models.Monkey.query.filter_by(id=id).scalar()
     if monkey == None:
        return abort(404)
     return render_template('profile.html',
-                           monkey=monkey)
+                           monkey=monkey,
+                           add_friends=add_friends)
+
+
+@app.route('/monkey/<id>/add_friends')
+def profile_add_friend(id):
+    return profile(id, add_friends=True)
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_monkey():
@@ -65,6 +72,19 @@ def delete_monkey(id):
     return redirect(url_for('index'))
 
 
+@app.route('/add/<id>/<friend_id>')
+def add_friend(id, friend_id):
+    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    friend = models.Monkey.query.filter_by(id=friend_id).scalar()
+    if monkey.add_friend(friend):
+        db.session.add_all([monkey, friend])
+        db.session.commit()
+        flash('Friends with ' + friend.name)
+    else:
+        flash("Can't make friends with " + friend.name)
+    return redirect(url_for('profile', id=monkey.id))
+
+
 @app.route('/unfriend/<id>/<friend_id>')
 def unfriend(id, friend_id):
     monkey = models.Monkey.query.filter_by(id=id).scalar()
@@ -72,7 +92,7 @@ def unfriend(id, friend_id):
     if monkey.delete_friend(friend):
         db.session.add_all([monkey, friend])
         db.session.commit()
-        flash('You unfriended ' + friend.name)
+        flash('Unfriended ' + friend.name)
     else:
-        flash('Nope')
+        flash('Unfriending failed')
     return redirect(url_for('profile', id=monkey.id))
