@@ -7,6 +7,7 @@ app = Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 Bootstrap(app)
+app.config.from_object('config')
 
 
 from app import models, views
