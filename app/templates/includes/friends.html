@@ -11,6 +11,9 @@
     <span><span class="fa fa-bookmark fa-fw"></span>{{ monkey.best_friend.name }}</span>
     <span>{{ monkey.best_friend.email }}</span>
     <span>{{ monkey.best_friend.friends.count() }} friends</span>
+    {% if monkey.best_friend %}
+    <span>Best friend: <a href="{{ url_for('profile', id=monkey.best_friend.best_friend.id) }}">{{ monkey.best_friend.best_friend.name }}</a></span>
+    {% endif %}
     <a href="{{ url_for('remove_bf', id=monkey.id) }}" class="btn btn-default">
       <span class="fa fa-bookmark fa-fw"></span>
       &nbsp; Remove best friend
@@ -27,6 +30,7 @@
     <span>{{ friend.name }}</span>
     <span>{{ friend.email }}</span>
     <span>{{ friend.friends.count() }} friends</span>
+    <span>Best friend: <a href="{{ url_for('profile', id=friend.best_friend.id) }}">{{ friend.best_friend.name }}</a> </span>
     <a href="{{ url_for('add_bf', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default">
       <span class="fa fa-bookmark-o fa-fw"></span>
       &nbsp; Add best friend

@@ -38,7 +38,7 @@ class Monkey(db.Model):
         return '<Monkey {}>'.format(self.name)
 
     def avatar(self, size):
-        return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(
+        return 'http://www.gravatar.com/avatar/%s?d=retro&s=%d' % (md5(
             self.email.encode('utf-8')).hexdigest(), size
         )
 

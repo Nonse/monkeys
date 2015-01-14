@@ -11,6 +11,9 @@
     <span>{{ friend.name }}</span>
     <span>{{ friend.email }}</span>
     <span>{{ friend.friends.count() }} friends</span>
+    {% if friend.best_friend %}
+    <span>Best friend: <a href="{{ url_for('profile', id=friend.best_friend.id) }}">{{ friend.best_friend.name }}</a> </span>
+    {% endif %}
     <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default">
       <span class="fa fa-plus fa-fw"></span>
       &nbsp; Add friend
