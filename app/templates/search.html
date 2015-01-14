@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block innercontent %}
+<h1>All Monkeys</h1>
+
+<a href="{{ url_for('search', sort='name_asc')}}" class="btn btn-default">
+  <span class="fa fa-sort-alpha-asc fa-fw"></span>
+  &nbsp; Sort by Name ASC
+</a>
+<a href="{{ url_for('search', sort='name_desc')}}" class="btn btn-default">
+  <span class="fa fa-sort-alpha-desc fa-fw"></span>
+  &nbsp; Sort by Name DESC
+</a>
+<a href="{{ url_for('search', sort='number_asc')}}" class="btn btn-default">
+  <span class="fa fa-sort-numeric-asc fa-fw"></span>
+  &nbsp; Sort by Number of Friends ASC
+</a>
+<a href="{{ url_for('search', sort='number_desc')}}" class="btn btn-default">
+  <span class="fa fa-sort-numeric-desc fa-fw"></span>
+  &nbsp; Sort by Number of Friends DESC
+</a>
+<a href="{{ url_for('search', sort='bf_asc')}}" class="btn btn-default">
+<span class="fa fa-long-arrow-up fa-user fa-fw"></span>
+  <span class="fa fa-user fa-fw"></span>
+  &nbsp; Sort by Name of the Best Friend ASC
+</a>
+<a href="{{ url_for('search', sort='bf_desc')}}" class="btn btn-default">
+  <span class="fa fa-long-arrow-down fa-user fa-fw"></span>
+  <span class="fa fa-user fa-fw"></span>
+  &nbsp; Sort by Name of the Best Friend DESC
+</a>
+<ul class="friends-row">
+  {% for monkey in friends %}
+  <li class="friends-item">
+    <a href="{{ url_for('profile', id=monkey.id) }}"><img src="{{ monkey.avatar(150) }}"></a>
+    <span>{{ monkey.name }}</span>
+    <span>{{ monkey.email }}</span>
+    <span>{{ monkey.friends.count() }} friends</span>
+    {% if monkey.best_friend %}
+    <span>Best friend: <a href="{{ url_for('profile', id=monkey.best_friend.id) }}">{{ monkey.best_friend.name }}</a> </span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,17 +1,57 @@
 from flask import render_template, redirect, url_for, abort, flash, request
-from app import app, models
+from sqlalchemy import asc, desc, func
+from sqlalchemy.orm import aliased
+from app import app, db
 from .forms import CreateMonkeyForm, EditMonkeyForm
-from .models import Monkey, db
+from .models import Monkey, friendship
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    friends = Monkey.query.all()
+    return render_template('index.html',
+                            friends=friends)
+
+
+@app.route('/search', methods=['GET'])
+def search ():
+    friends = Monkey.query
+    criteria = request.args.get('sort', '')
+    if criteria == 'name_asc':
+        friends = friends.order_by(asc(Monkey.name))
+    elif criteria == 'name_desc':
+        friends = friends.order_by(desc(Monkey.name))
+    elif criteria.startswith('number_'):
+        friends = db.session.query(
+            Monkey,
+            func.count(friendship.c.monkey).label('friend_count')
+        ).outerjoin(
+            friendship,
+            Monkey.id==friendship.c.monkey
+        ).group_by(Monkey)
+        if criteria.endswith('asc'):
+            friends = friends.order_by(asc('friend_count'))
+        else:
+            friends = friends.order_by(desc('friend_count'))
+        friends = map(lambda f: f[0], friends)
+    elif criteria.startswith('bf_'):
+        bf_alias = aliased(Monkey)
+        friends = db.session.query(Monkey).outerjoin(
+            bf_alias,
+            Monkey.best_friend_id == bf_alias.id
+        )
+        if criteria.endswith('asc'):
+            friends = friends.order_by(asc(bf_alias.name))
+        else:
+            friends = friends.order_by(desc(bf_alias.name))
+    return render_template('search.html',
+                            friends=friends,
+                            criteria=criteria)
 
 
 @app.route('/monkey/<id>')
 def profile(id, add_friends=False):
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
     if monkey == None:
        return abort(404)
     return render_template('profile.html',
@@ -47,7 +87,7 @@ def create_monkey():
 @app.route('/edit/<id>', methods=['GET', 'POST'])
 def edit_monkey(id):
     form = EditMonkeyForm()
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
     if form.validate_on_submit():
         monkey.name = form.name.data
         monkey.email = form.email.data
@@ -65,7 +105,7 @@ def edit_monkey(id):
 
 @app.route('/delete/<id>')
 def delete_monkey(id):
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
     db.session.delete(monkey)
     db.session.commit()
     flash('You just deleted ' + monkey.name)
@@ -74,8 +114,8 @@ def delete_monkey(id):
 
 @app.route('/add/<id>/<friend_id>')
 def add_friend(id, friend_id):
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
-    friend = models.Monkey.query.filter_by(id=friend_id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
+    friend = Monkey.query.filter_by(id=friend_id).scalar()
     if monkey.add_friend(friend):
         db.session.add_all([monkey, friend])
         db.session.commit()
@@ -87,8 +127,8 @@ def add_friend(id, friend_id):
 
 @app.route('/unfriend/<id>/<friend_id>')
 def unfriend(id, friend_id):
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
-    friend = models.Monkey.query.filter_by(id=friend_id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
+    friend = Monkey.query.filter_by(id=friend_id).scalar()
     if monkey.delete_friend(friend):
         db.session.add_all([monkey, friend])
         db.session.commit()
@@ -100,8 +140,8 @@ def unfriend(id, friend_id):
 
 @app.route('/add_bf/<id>/<friend_id>')
 def add_bf(id, friend_id):
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
-    friend = models.Monkey.query.filter_by(id=friend_id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
+    friend = Monkey.query.filter_by(id=friend_id).scalar()
     if monkey.add_best_friend(friend):
         db.session.add_all([monkey, friend])
         db.session.commit()
@@ -113,7 +153,7 @@ def add_bf(id, friend_id):
 
 @app.route('/remove_bf/<id>')
 def remove_bf(id):
-    monkey = models.Monkey.query.filter_by(id=id).scalar()
+    monkey = Monkey.query.filter_by(id=id).scalar()
     friend = monkey.best_friend
     monkey.best_friend = None
     db.session.add(monkey)
