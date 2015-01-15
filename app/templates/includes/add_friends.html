@@ -7,12 +7,14 @@
 <ul class="friends-row">
   {% for friend in monkey.non_friends() %}
   <li class="friends-item">
+    <span><strong>{{ friend.name }}</strong></span>
     <a href="{{ url_for('profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
-    <span>{{ friend.name }}</span>
     <span>{{ friend.email }}</span>
     <span>{{ friend.friends.count() }} friends</span>
     {% if friend.best_friend %}
     <span>Best friend: <a href="{{ url_for('profile', id=friend.best_friend.id) }}">{{ friend.best_friend.name }}</a> </span>
+    {% else %}
+    <span>No best friend :(</span>
     {% endif %}
     <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default">
       <span class="fa fa-plus fa-fw"></span>

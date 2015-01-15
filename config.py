@@ -8,3 +8,5 @@ SQLALCHEMY_DATABASE_URI = (
 
 WTF_CSRF_ENABLED = True
 SECRET_KEY = 'why-would-i-tell-you-that?'
+
+MONKEYS_PER_PAGE = 10

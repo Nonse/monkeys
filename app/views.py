@@ -1,9 +1,11 @@
 from flask import render_template, redirect, url_for, abort, flash, request
-from sqlalchemy import asc, desc, func
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import aliased
+from flask.ext.paginate import Pagination
 from app import app, db
 from .forms import CreateMonkeyForm, EditMonkeyForm
 from .models import Monkey, friendship
+from config import MONKEYS_PER_PAGE
 
 
 @app.route('/')
@@ -14,39 +16,51 @@ def index():
 
 
 @app.route('/search', methods=['GET'])
-def search ():
-    friends = Monkey.query
+def search():
+    monkey_query = Monkey.query
+    # pagination = Pagination(page, MONKEYS_PER_PAGE, False)
     criteria = request.args.get('sort', '')
+    page = int(request.args.get('page', 1))
+    pagination_query = None
     if criteria == 'name_asc':
-        friends = friends.order_by(asc(Monkey.name))
+        monkey_query = monkey_query.order_by(asc(Monkey.name))
     elif criteria == 'name_desc':
-        friends = friends.order_by(desc(Monkey.name))
+        monkey_query = monkey_query.order_by(desc(Monkey.name))
     elif criteria.startswith('number_'):
-        friends = db.session.query(
-            Monkey,
-            func.count(friendship.c.monkey).label('friend_count')
-        ).outerjoin(
-            friendship,
-            Monkey.id==friendship.c.monkey
-        ).group_by(Monkey)
+        monkey_query = Monkey.query_with_friend_count()
         if criteria.endswith('asc'):
-            friends = friends.order_by(asc('friend_count'))
+            monkey_query = monkey_query.order_by(asc('friend_count'))
         else:
-            friends = friends.order_by(desc('friend_count'))
-        friends = map(lambda f: f[0], friends)
+            monkey_query = monkey_query.order_by(desc('friend_count'))
+        pagination_query = monkey_query.paginate(
+            page,
+            MONKEYS_PER_PAGE,
+            False
+        )
+        monkeys = map(lambda f: f[0], pagination.items)
     elif criteria.startswith('bf_'):
         bf_alias = aliased(Monkey)
-        friends = db.session.query(Monkey).outerjoin(
-            bf_alias,
-            Monkey.best_friend_id == bf_alias.id
-        )
+        monkey_query = Monkey.query_with_best_friend(bf_alias)
         if criteria.endswith('asc'):
-            friends = friends.order_by(asc(bf_alias.name))
+            monkey_query = monkey_query.order_by(asc(bf_alias.name))
         else:
-            friends = friends.order_by(desc(bf_alias.name))
+            monkey_query = monkey_query.order_by(desc(bf_alias.name))
+    if not pagination_query:
+        pagination_query = monkey_query.paginate(
+            page,
+            MONKEYS_PER_PAGE,
+            False
+        )
+        monkeys = pagination_query.items
+    pagination = Pagination(
+        page=pagination_query.page,
+        total=pagination_query.total,
+        css_framework='bootstrap3'
+    )
     return render_template('search.html',
-                            friends=friends,
-                            criteria=criteria)
+                            monkeys=monkeys,
+                            criteria=criteria,
+                            pagination=pagination)
 
 
 @app.route('/monkey/<id>')
@@ -75,6 +89,7 @@ def create_monkey():
     if form.validate_on_submit():
         monkey = Monkey()
         monkey.name = form.name.data
+        monkey.age = form.age.data
         monkey.email = form.email.data
         db.session.add(monkey)
         db.session.commit()
@@ -90,6 +105,7 @@ def edit_monkey(id):
     monkey = Monkey.query.filter_by(id=id).scalar()
     if form.validate_on_submit():
         monkey.name = form.name.data
+        monkey.age = form.age.data
         monkey.email = form.email.data
         db.session.add(monkey)
         db.session.commit()
@@ -97,6 +113,7 @@ def edit_monkey(id):
         return redirect(url_for('profile', id=monkey.id))
     else:
         form.name.data = monkey.name
+        form.age.data = monkey.age
         form.email.data = monkey.email
     return render_template('edit.html',
                             form=form,

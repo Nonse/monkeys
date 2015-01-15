@@ -30,16 +30,19 @@
   &nbsp; Sort by Name of the Best Friend DESC
 </a>
 <ul class="friends-row">
-  {% for monkey in friends %}
+  {% for monkey in monkeys %}
   <li class="friends-item">
+    <span><strong>{{ monkey.name }}</strong></span>
     <a href="{{ url_for('profile', id=monkey.id) }}"><img src="{{ monkey.avatar(150) }}"></a>
-    <span>{{ monkey.name }}</span>
     <span>{{ monkey.email }}</span>
     <span>{{ monkey.friends.count() }} friends</span>
     {% if monkey.best_friend %}
     <span>Best friend: <a href="{{ url_for('profile', id=monkey.best_friend.id) }}">{{ monkey.best_friend.name }}</a> </span>
+    {% else %}
+    <span>No best friend :(</span>
     {% endif %}
   </li>
   {% endfor %}
 </ul>
+{{ pagination.links|safe }}
 {% endblock %}
