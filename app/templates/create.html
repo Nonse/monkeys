@@ -5,9 +5,12 @@
 <form action="{{ url_for('create_monkey') }}" method="POST" name="CreateMonkey">
       {{ form.hidden_tag() }}
       <p>Monkey name<br>
-       {{ form.name(size=50) }}<br>
+       {{ form.name(size=50) }}
       </p>
-      <p>{{ form.email }} Monkey email</p>
+      <p>Monkey age<br>
+      {{ form.age }}
+      </p>
+      <p>Monkey email<br>{{ form.email }} </p>
       <input type="submit" value="Create!">
   </form>
 

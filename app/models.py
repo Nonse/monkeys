@@ -1,5 +1,7 @@
 from app import db
 from hashlib import md5
+from sqlalchemy import func
+from sqlalchemy.orm import aliased
 
 
 friendship = db.Table('friendship',
@@ -12,6 +14,7 @@ class Monkey(db.Model):
     __tablename__ = 'monkey'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), index=True)
+    age = db.Column(db.Integer, index=True)
     email = db.Column(db.String(100), index=True, unique=True)
     best_friend_id = db.Column(
         db.Integer,
@@ -61,11 +64,8 @@ class Monkey(db.Model):
             # monkeys must be at least friends
             if self.best_friend == monkey:
                 self.best_friend = None
-            if monkey.best_friend == self:
-                monkey.best_friend = None
-
             self.friends.remove(monkey)
-            monkey.friends.remove(self)
+            monkey.delete_friend(self)
             return True
         else:
             return False
@@ -89,3 +89,22 @@ class Monkey(db.Model):
         return Monkey.query.filter(
             Monkey.id != self.id
         ).except_all(self.friends)
+
+    @staticmethod
+    def query_with_friend_count():
+        monkeys = Monkey.query.with_entities(
+            Monkey,
+            func.count(friendship.c.monkey).label('friend_count')
+        ).outerjoin(
+            friendship,
+            Monkey.id==friendship.c.monkey
+        ).group_by(Monkey)
+        return monkeys
+
+    @staticmethod
+    def query_with_best_friend(bf_alias):
+        monkeys = Monkey.query.with_entities(Monkey).outerjoin(
+            bf_alias,
+            Monkey.best_friend_id == bf_alias.id
+        )
+        return monkeys

@@ -6,6 +6,7 @@
     <img class="avatar" src="{{ monkey.avatar(200) }}">
       <ul>
         <li>name: {{ monkey.name }}</li>
+        <li>age: {{ monkey.age }}</li>
         <li>email: {{ monkey.email }}</li>
       </ul>
       <a href="{{ url_for('edit_monkey', id=monkey.id) }}" class="btn btn-default">

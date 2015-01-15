@@ -16,6 +16,7 @@ def insert_data():
         monkeys.append(
             models.Monkey(
                 name='monkey{}'.format(i+1),
+                age=random.randint(0, 99),
                 email='monkey{}@example.com'.format(i+1)
             )
         )
