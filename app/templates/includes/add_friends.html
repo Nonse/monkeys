@@ -1,13 +1,13 @@
-<a href="{{ url_for('profile', id=monkey.id) }}" class="btn btn-default">
+<a href="{{ url_for('profile', id=monkey.id) }}" class="btn btn-default btn-full-width">
   <span class="fa fa-chevron-left fa-fw"></span>
   &nbsp; Cancel
 </a>
 <h1>Adding Friends</h1>
 
 <ul class="friends-row">
-  {% for friend in monkey.non_friends() %}
+  {% for friend in friends.items %}
   <li class="friends-item">
-    <span><strong>{{ friend.name }}</strong></span>
+    <span class="bold-text">{{ friend.name }}</span>
     <a href="{{ url_for('profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
     <span>{{ friend.email }}</span>
     <span>{{ friend.friends.count() }} friends</span>
@@ -16,10 +16,14 @@
     {% else %}
     <span>No best friend :(</span>
     {% endif %}
-    <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default">
+    <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-plus fa-fw"></span>
       &nbsp; Add friend
     </a>
   </li>
+  {% endfor %}
+  {# for flex-box space between to work #}
+  {% for flex_gap in range(10) %}
+  <li class="flex-gap"></li>
   {% endfor %}
 </ul>

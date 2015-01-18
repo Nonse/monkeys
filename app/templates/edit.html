@@ -1,18 +1,18 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block innercontent %}
-<h1>Edit Monkey!</h1>
-<form action="{{ url_for('edit_monkey', id=monkey.id) }}" method="POST" name="EditMonkey">
-      {{ form.hidden_tag() }}
-      <p>Monkey name<br>
-       {{ form.name(size=50) }}
-      </p>
-      <p>Monkey age<br>
-      {{ form.age }}
-      </p>
-      <p>Monkey email<br>
-      {{ form.email }} </p>
-      <input type="submit" value="Save">
-  </form>
+<h2>Edit Monkey</h2>
+<form action="{{ url_for('edit_monkey', id=monkey.id) }}" class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form, hiddens="only") }}
 
+  {{ wtf.form_field(form.name, form_type="basic", horizontal_columns=('lg', 2, 6)) }}
+  {{ wtf.form_field(form.age, form_type="basic", horizontal_columns=('lg', 2, 6)) }}
+  {{ wtf.form_field(form.email, form_type="basic", horizontal_columns=('lg', 2, 6)) }}
+  <div class="btn-group.btn-group-justified" role="group">
+  <input class="btn btn-success" type="submit" value="Save">
+  <a class="btn btn-default" href="{{ url_for('profile', id=monkey.id) }}" >Cancel</a>
+  </div>
+</form>
 {% endblock %}
