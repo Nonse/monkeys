@@ -1,6 +1,6 @@
 <a href="{{ url_for('profile_add_friend', id=monkey.id) }}" class="btn btn-default">
   <span class="fa fa-plus fa-fw"></span>
-  &nbsp; Add friend
+  &nbsp;Add friend
 </a>
 <h1>{{ monkey.friends.count() }} Friends</h1>
 
@@ -16,11 +16,11 @@
     {% endif %}
     <a href="{{ url_for('remove_bf', id=monkey.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-bookmark fa-fw"></span>
-      &nbsp; Remove best friend
+      &nbsp;Remove best friend
     </a>
     <a href="{{ url_for('unfriend', id=monkey.id, friend_id=monkey.best_friend.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-times fa-fw"></span>
-      &nbsp; Unfriend
+      &nbsp;Unfriend
     </a>
   </li>
   {% endif %}
@@ -37,11 +37,11 @@
     {% endif %}
     <a href="{{ url_for('add_bf', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-bookmark-o fa-fw"></span>
-      &nbsp; Add best friend
+      &nbsp;Add best friend
     </a>
     <a href="{{ url_for('unfriend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-times fa-fw"></span>
-      &nbsp; Unfriend
+      &nbsp;Unfriend
     </a>
   </li>
   {% endfor %}

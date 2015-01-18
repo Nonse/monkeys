@@ -1,6 +1,6 @@
 <a href="{{ url_for('profile', id=monkey.id) }}" class="btn btn-default">
   <span class="fa fa-chevron-left fa-fw"></span>
-  &nbsp; Cancel
+  &nbsp;Cancel
 </a>
 <h1>Adding Friends</h1>
 
@@ -18,7 +18,7 @@
     {% endif %}
     <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-plus fa-fw"></span>
-      &nbsp; Add friend
+      &nbsp;Add friend
     </a>
   </li>
   {% endfor %}
