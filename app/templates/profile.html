@@ -3,27 +3,24 @@
 {% block innercontent %}
 <div class="flex-container">
   <div class="left-side">
-    <img class="avatar" src="{{ monkey.avatar(200) }}">
+    <h3>{{ monkey.name }}</h3>
+    <img src="{{ monkey.avatar(200) }}">
       <ul>
-        <li>name: {{ monkey.name }}</li>
         <li>age: {{ monkey.age }}</li>
         <li>email: {{ monkey.email }}</li>
       </ul>
-      <a href="{{ url_for('edit_monkey', id=monkey.id) }}" class="btn btn-default">
+      <a href="{{ url_for('edit_monkey', id=monkey.id) }}" class="btn btn-default btn-full-width">
         <span class="fa fa-pencil fa-fw"></span>
         &nbsp; Edit monkey
       </a>
-      <a href="{{ url_for('delete_monkey', id=monkey.id) }}" class="btn btn-default">
+      <a href="{{ url_for('delete_monkey', id=monkey.id) }}" class="btn btn-default btn-full-width">
         <span class="fa fa-times fa-fw"></span>
         &nbsp; Delete monkey
       </a>
   </div>
   <div class="info">
-  {% if add_friends %}
-  {% include "includes/add_friends.html" %}
-  {% else %}
-  {% include "includes/friends.html" %}
-  {% endif %}
+  {% include friends_template %}
+  {{ pagination.links|safe }}
   </div>
 </div>
 {% endblock %}

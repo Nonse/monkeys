@@ -83,7 +83,7 @@ class Monkey(db.Model):
         if self.best_friend is not None:
             return self.friends.filter(Monkey.id != self.best_friend.id)
         else:
-            return self.friends.all()
+            return self.friends
 
     def non_friends(self):
         return Monkey.query.filter(

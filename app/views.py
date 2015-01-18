@@ -18,7 +18,6 @@ def index():
 @app.route('/search', methods=['GET'])
 def search():
     monkey_query = Monkey.query
-    # pagination = Pagination(page, MONKEYS_PER_PAGE, False)
     criteria = request.args.get('sort', '')
     page = int(request.args.get('page', 1))
     pagination_query = None
@@ -37,7 +36,7 @@ def search():
             MONKEYS_PER_PAGE,
             False
         )
-        monkeys = map(lambda f: f[0], pagination.items)
+        monkeys = map(lambda f: f[0], pagination_query.items)
     elif criteria.startswith('bf_'):
         bf_alias = aliased(Monkey)
         monkey_query = Monkey.query_with_best_friend(bf_alias)
@@ -68,9 +67,28 @@ def profile(id, add_friends=False):
     monkey = Monkey.query.filter_by(id=id).scalar()
     if monkey == None:
        return abort(404)
+    page = int(request.args.get('page', 1))
+    if add_friends:
+        friends = monkey.non_friends()
+        template = 'includes/add_friends.html'
+    else:
+        friends = monkey.friends_without_best()
+        template = 'includes/friends.html'
+    friends = friends.paginate(
+            page,
+            MONKEYS_PER_PAGE,
+            False
+        )
+    pagination = Pagination(
+        page=friends.page,
+        total=friends.total,
+        css_framework='bootstrap3'
+    )
     return render_template('profile.html',
                            monkey=monkey,
-                           add_friends=add_friends)
+                           friends=friends,
+                           friends_template=template,
+                           pagination=pagination)
 
 
 @app.route('/monkey/<id>/add_friends')
