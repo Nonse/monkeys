@@ -168,3 +168,8 @@ ul{
 .form {
   width: 400px;
 }
+
+.monkey-name {
+  margin: 0;
+  padding-bottom: 5px;
+}

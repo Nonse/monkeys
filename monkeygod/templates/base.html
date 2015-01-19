@@ -12,8 +12,8 @@
 {% block content %}
 <ul class="navigation">
     <li class="logo"><a href="/"><span class="fa fa-home fa-fw fa-lg"></span></a></li>
-    <li><a href="{{ url_for('search') }}">All Monkeys</a></li>
-    <li><a href="{{ url_for('create_monkey') }}">Add Monkey</a></li>
+    <li><a href="{{ url_for('monkey_views.search') }}">All Monkeys</a></li>
+    <li><a href="{{ url_for('monkey_views.create_monkey') }}">Add Monkey</a></li>
 </ul>
 <article class="main">
 {% with messages = get_flashed_messages() %}

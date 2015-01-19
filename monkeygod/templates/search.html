@@ -9,37 +9,37 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="{{ url_for('search', sort='name_asc')}}">
+      <a href="{{ url_for('monkey_views.search', sort='name_asc')}}">
         <span class="fa fa-sort-alpha-asc fa-fw"></span>
         &nbsp;Name ASC
       </a>
     </li>
     <li>
-      <a href="{{ url_for('search', sort='name_desc')}}">
+      <a href="{{ url_for('monkey_views.search', sort='name_desc')}}">
         <span class="fa fa-sort-alpha-desc fa-fw"></span>
         &nbsp;Name DESC
       </a>
     </li>
     <li>
-    <a href="{{ url_for('search', sort='number_asc')}}">
+    <a href="{{ url_for('monkey_views.search', sort='number_asc')}}">
       <span class="fa fa-sort-amount-asc fa-fw"></span>
       &nbsp;Number of Friends ASC
     </a>
     </li>
     <li>
-    <a href="{{ url_for('search', sort='number_desc')}}">
+    <a href="{{ url_for('monkey_views.search', sort='number_desc')}}">
       <span class="fa fa-sort-amount-desc fa-fw"></span>
       &nbsp;Number of Friends DESC
     </a>
     </li>
     <li>
-    <a href="{{ url_for('search', sort='bf_asc')}}">
+    <a href="{{ url_for('monkey_views.search', sort='bf_asc')}}">
       <span class="fa fa-bookmark fa-fw"></span>
       &nbsp;Best Friend ASC
     </a>
     </li>
     <li>
-    <a href="{{ url_for('search', sort='bf_desc')}}">
+    <a href="{{ url_for('monkey_views.search', sort='bf_desc')}}">
       <span class="fa fa-bookmark fa-fw fa-rotate-180"></span>
       &nbsp;Best Friend DESC
     </a>
@@ -49,12 +49,12 @@
 <ul class="friends-row">
   {% for monkey in monkeys %}
   <li class="friends-item">
-    <span class="bold-text">{{ monkey.name }}</span>
-    <a href="{{ url_for('profile', id=monkey.id) }}"><img src="{{ monkey.avatar(150) }}"></a>
+    <h4 class="monkey-name">{{ monkey.name }}</h4>
+    <a href="{{ url_for('monkey_views.profile', id=monkey.id) }}"><img src="{{ monkey.avatar(150) }}"></a>
     <span>{{ monkey.email }}</span>
     <span>{{ monkey.friends.count() }} friends</span>
     {% if monkey.best_friend %}
-    <span>Best friend: <a href="{{ url_for('profile', id=monkey.best_friend.id) }}">{{ monkey.best_friend.name }}</a> </span>
+    <span>Best friend: <a href="{{ url_for('monkey_views.profile', id=monkey.best_friend.id) }}">{{ monkey.best_friend.name }}</a> </span>
     {% else %}
     <span>No best friend :(</span>
     {% endif %}

@@ -1,7 +1,16 @@
 #!venv/bin/python
-from app import db
+import config
+from monkeygod import create_app, models
+from monkeygod.models import db
 
 
-print('Creating database..')
-db.create_all()
-print('Done')
+def create_db():
+    db.create_all()
+
+
+if __name__ == '__main__':
+    app = create_app(config)
+    with app.app_context():
+        print('Creating database..')
+        create_db()
+        print('Done')

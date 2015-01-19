@@ -1,21 +1,24 @@
 from flask import render_template, redirect, url_for, abort, flash, request
+from flask import current_app, Blueprint
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import aliased
 from flask.ext.paginate import Pagination
-from app import app, db
 from .forms import CreateMonkeyForm, EditMonkeyForm
-from .models import Monkey, friendship
+from .models import db, Monkey, friendship
 from config import MONKEYS_PER_PAGE
 
 
-@app.route('/')
+monkey_views = Blueprint('monkey_views', __name__, static_folder='static')
+
+
+@monkey_views.route('/')
 def index():
     friends = Monkey.query.all()
     return render_template('index.html',
                             friends=friends)
 
 
-@app.route('/search', methods=['GET'])
+@monkey_views.route('/search', methods=['GET'])
 def search():
     monkey_query = Monkey.query
     criteria = request.args.get('sort', '')
@@ -33,8 +36,7 @@ def search():
             monkey_query = monkey_query.order_by(desc('friend_count'))
         pagination_query = monkey_query.paginate(
             page,
-            MONKEYS_PER_PAGE,
-            False
+            MONKEYS_PER_PAGE
         )
         monkeys = map(lambda f: f[0], pagination_query.items)
     elif criteria.startswith('bf_'):
@@ -47,8 +49,7 @@ def search():
     if not pagination_query:
         pagination_query = monkey_query.paginate(
             page,
-            MONKEYS_PER_PAGE,
-            False
+            MONKEYS_PER_PAGE
         )
         monkeys = pagination_query.items
     pagination = Pagination(
@@ -62,7 +63,7 @@ def search():
                             pagination=pagination)
 
 
-@app.route('/monkey/<id>')
+@monkey_views.route('/monkey/<id>')
 def profile(id, add_friends=False):
     monkey = Monkey.query.filter_by(id=id).scalar()
     if monkey == None:
@@ -75,10 +76,9 @@ def profile(id, add_friends=False):
         friends = monkey.friends_without_best()
         template = 'includes/friends.html'
     friends = friends.paginate(
-            page,
-            MONKEYS_PER_PAGE,
-            False
-        )
+        page,
+        MONKEYS_PER_PAGE
+    )
     pagination = Pagination(
         page=friends.page,
         total=friends.total,
@@ -91,17 +91,17 @@ def profile(id, add_friends=False):
                            pagination=pagination)
 
 
-@app.route('/monkey/<id>/add_friends')
+@monkey_views.route('/monkey/<id>/add_friends')
 def profile_add_friend(id):
     return profile(id, add_friends=True)
 
 
-@app.errorhandler(404)
+@monkey_views.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
 
-@app.route('/create', methods=['GET', 'POST'])
+@monkey_views.route('/create', methods=['GET', 'POST'])
 def create_monkey():
     form = CreateMonkeyForm()
     if form.validate_on_submit():
@@ -112,12 +112,12 @@ def create_monkey():
         db.session.add(monkey)
         db.session.commit()
         flash('Monkey created!')
-        return redirect(url_for('profile', id=monkey.id))
+        return redirect(url_for('monkey_views.profile', id=monkey.id))
     return render_template('create.html',
                             form=form)
 
 
-@app.route('/edit/<id>', methods=['GET', 'POST'])
+@monkey_views.route('/edit/<id>', methods=['GET', 'POST'])
 def edit_monkey(id):
     form = EditMonkeyForm()
     monkey = Monkey.query.filter_by(id=id).scalar()
@@ -128,7 +128,7 @@ def edit_monkey(id):
         db.session.add(monkey)
         db.session.commit()
         flash('Monkey edited!')
-        return redirect(url_for('profile', id=monkey.id))
+        return redirect(url_for('monkey_views.profile', id=monkey.id))
     else:
         form.name.data = monkey.name
         form.age.data = monkey.age
@@ -138,16 +138,16 @@ def edit_monkey(id):
                             monkey=monkey)
 
 
-@app.route('/delete/<id>')
+@monkey_views.route('/delete/<id>')
 def delete_monkey(id):
     monkey = Monkey.query.filter_by(id=id).scalar()
     db.session.delete(monkey)
     db.session.commit()
     flash('You just deleted ' + monkey.name)
-    return redirect(url_for('index'))
+    return redirect(url_for('monkey_views.index'))
 
 
-@app.route('/add/<id>/<friend_id>')
+@monkey_views.route('/add/<id>/<friend_id>')
 def add_friend(id, friend_id):
     monkey = Monkey.query.filter_by(id=id).scalar()
     friend = Monkey.query.filter_by(id=friend_id).scalar()
@@ -157,10 +157,10 @@ def add_friend(id, friend_id):
         flash('Friends with ' + friend.name)
     else:
         flash("Can't make friends with " + friend.name)
-    return redirect(url_for('profile', id=monkey.id))
+    return redirect(url_for('monkey_views.profile', id=monkey.id))
 
 
-@app.route('/unfriend/<id>/<friend_id>')
+@monkey_views.route('/unfriend/<id>/<friend_id>')
 def unfriend(id, friend_id):
     monkey = Monkey.query.filter_by(id=id).scalar()
     friend = Monkey.query.filter_by(id=friend_id).scalar()
@@ -170,10 +170,10 @@ def unfriend(id, friend_id):
         flash('Unfriended ' + friend.name)
     else:
         flash('Unfriending failed')
-    return redirect(url_for('profile', id=monkey.id))
+    return redirect(url_for('monkey_views.profile', id=monkey.id))
 
 
-@app.route('/add_bf/<id>/<friend_id>')
+@monkey_views.route('/add_bf/<id>/<friend_id>')
 def add_bf(id, friend_id):
     monkey = Monkey.query.filter_by(id=id).scalar()
     friend = Monkey.query.filter_by(id=friend_id).scalar()
@@ -183,10 +183,10 @@ def add_bf(id, friend_id):
         flash("{} is now {}'s best friend".format(friend.name, monkey.name))
     else:
         flash('Failed to add {} as the best friend'.format(friend.name))
-    return redirect(url_for('profile', id=monkey.id))
+    return redirect(url_for('monkey_views.profile', id=monkey.id))
 
 
-@app.route('/remove_bf/<id>')
+@monkey_views.route('/remove_bf/<id>')
 def remove_bf(id):
     monkey = Monkey.query.filter_by(id=id).scalar()
     friend = monkey.best_friend
@@ -196,4 +196,4 @@ def remove_bf(id):
     flash("{} is not {}'s best friend anymore".format(
         friend.name, monkey.name)
     )
-    return redirect(url_for('profile', id=monkey.id))
+    return redirect(url_for('monkey_views.profile', id=monkey.id))

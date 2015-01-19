@@ -1,5 +1,10 @@
 #!venv/bin/python
-from app import app
+from monkeygod import create_app
 import config
 
-app.run(debug=config.DEBUG)
+
+app = create_app(config)
+
+
+if __name__ == '__main__':
+    app.run(debug=config.DEBUG)

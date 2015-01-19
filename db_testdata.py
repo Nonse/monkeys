@@ -1,6 +1,8 @@
 #!venv/bin/python
 import random
-from app import db, models
+import config
+from monkeygod import create_app, models
+from monkeygod.models import db
 
 
 def clear_db():
@@ -36,8 +38,10 @@ def insert_data():
 
 
 if __name__ == '__main__':
-    print('Clearing data..')
-    clear_db()
-    print('Inserting test data..')
-    insert_data()
-    print('Done')
+    app = create_app(config)
+    with app.app_context():
+        print('Clearing data..')
+        clear_db()
+        print('Inserting test data..')
+        insert_data()
+        print('Done')

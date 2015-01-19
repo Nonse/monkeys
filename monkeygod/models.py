@@ -1,7 +1,10 @@
-from app import db
 from hashlib import md5
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
+from flask.ext.sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy()
 
 
 friendship = db.Table('friendship',

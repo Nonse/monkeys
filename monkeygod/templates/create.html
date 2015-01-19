@@ -3,7 +3,7 @@
 
 {% block innercontent %}
 <h2>Create Monkey</h2>
-<form action="{{ url_for('create_monkey') }}" class="form" method="post" role="form">
+<form action="{{ url_for('monkey_views.create_monkey') }}" class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ wtf.form_errors(form, hiddens="only") }}
 
@@ -12,7 +12,7 @@
   {{ wtf.form_field(form.email, form_type="basic", horizontal_columns=('lg', 2, 6)) }}
   <div class="btn-group.btn-group-justified" role="group">
   <input class="btn btn-success" type="submit" value="Create">
-  <a class="btn btn-default" href="{{ url_for('index')}}" >Back</a>
+  <a class="btn btn-default" href="{{ url_for('monkey_views.index')}}" >Back</a>
   </div>
 </form>
 {% endblock %}

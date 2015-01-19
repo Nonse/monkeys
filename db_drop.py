@@ -1,6 +1,16 @@
 #!venv/bin/python
-from app import db
+import config
+from monkeygod import create_app, models
+from monkeygod.models import db
 
 
-print('Dropping previous tables..')
-db.drop_all(bind=None)
+def drop_db():
+    db.drop_all(bind=None)
+
+
+if __name__ == '__main__':
+    app = create_app(config)
+    with app.app_context():
+        print('Dropping previous tables..')
+        drop_db()
+        print('Done')

@@ -1,0 +1,52 @@
+<a href="{{ url_for('monkey_views.profile_add_friend', id=monkey.id) }}" class="btn btn-default">
+  <span class="fa fa-plus fa-fw"></span>
+  &nbsp;Add friend
+</a>
+<h1>{{ monkey.friends.count() }} Friends</h1>
+
+<ul class="friends-row">
+  {% if monkey.best_friend and pagination.page == 1 %}
+  <li class="friends-item">
+  <h4 class="monkey-name best-friend"><span class="fa fa-bookmark fa-fw"></span>&nbsp; {{ monkey.best_friend.name }}</h4>
+    <a href="{{ url_for('monkey_views.profile', id=monkey.best_friend.id) }}"><img src="{{ monkey.best_friend.avatar(150) }}"></a>
+    <span>{{ monkey.best_friend.email }}</span>
+    <span>{{ monkey.best_friend.friends.count() }} friends</span>
+    {% if monkey.best_friend %}
+    <span>Best friend: <a href="{{ url_for('monkey_views.profile', id=monkey.best_friend.best_friend.id) }}">{{ monkey.best_friend.best_friend.name }}</a></span>
+    {% endif %}
+    <a href="{{ url_for('monkey_views.remove_bf', id=monkey.id) }}" class="btn btn-default btn-full-width">
+      <span class="fa fa-bookmark fa-fw"></span>
+      &nbsp;Remove best friend
+    </a>
+    <a href="{{ url_for('monkey_views.unfriend', id=monkey.id, friend_id=monkey.best_friend.id) }}" class="btn btn-default btn-full-width">
+      <span class="fa fa-times fa-fw"></span>
+      &nbsp;Unfriend
+    </a>
+  </li>
+  {% endif %}
+  {% for friend in friends.items %}
+  <li class="friends-item">
+    <h4 class="monkey-name">{{ friend.name }}</h4>
+    <a href="{{ url_for('monkey_views.profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
+    <span>{{ friend.email }}</span>
+    <span>{{ friend.friends.count() }} friends</span>
+    {% if friend.best_friend %}
+    <span>Best friend: <a href="{{ url_for('monkey_views.profile', id=friend.best_friend.id) }}">{{ friend.best_friend.name }}</a> </span>
+    {% else %}
+    <span>No best friend :(</span>
+    {% endif %}
+    <a href="{{ url_for('monkey_views.add_bf', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
+      <span class="fa fa-bookmark-o fa-fw"></span>
+      &nbsp;Add best friend
+    </a>
+    <a href="{{ url_for('monkey_views.unfriend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
+      <span class="fa fa-times fa-fw"></span>
+      &nbsp;Unfriend
+    </a>
+  </li>
+  {% endfor %}
+  {# for flex-box space between to work #}
+  {% for flex_gap in range(10) %}
+  <li class="flex-gap"></li>
+  {% endfor %}
+</ul>

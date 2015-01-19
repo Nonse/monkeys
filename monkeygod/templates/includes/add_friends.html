@@ -1,4 +1,4 @@
-<a href="{{ url_for('profile', id=monkey.id) }}" class="btn btn-default">
+<a href="{{ url_for('monkey_views.profile', id=monkey.id) }}" class="btn btn-default">
   <span class="fa fa-chevron-left fa-fw"></span>
   &nbsp;Cancel
 </a>
@@ -7,16 +7,16 @@
 <ul class="friends-row">
   {% for friend in friends.items %}
   <li class="friends-item">
-    <span class="bold-text">{{ friend.name }}</span>
-    <a href="{{ url_for('profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
+    <h4 class="monkey-name">{{ friend.name }}</h4>
+    <a href="{{ url_for('monkey_views.profile', id=friend.id) }}"><img src="{{ friend.avatar(150) }}"></a>
     <span>{{ friend.email }}</span>
     <span>{{ friend.friends.count() }} friends</span>
     {% if friend.best_friend %}
-    <span>Best friend: <a href="{{ url_for('profile', id=friend.best_friend.id) }}">{{ friend.best_friend.name }}</a> </span>
+    <span>Best friend: <a href="{{ url_for('monkey_views.profile', id=friend.best_friend.id) }}">{{ friend.best_friend.name }}</a> </span>
     {% else %}
     <span>No best friend :(</span>
     {% endif %}
-    <a href="{{ url_for('add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
+    <a href="{{ url_for('monkey_views.add_friend', id=monkey.id, friend_id=friend.id) }}" class="btn btn-default btn-full-width">
       <span class="fa fa-plus fa-fw"></span>
       &nbsp;Add friend
     </a>
