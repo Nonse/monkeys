@@ -13,9 +13,7 @@ monkey_views = Blueprint('monkey_views', __name__, static_folder='static')
 
 @monkey_views.route('/')
 def index():
-    friends = Monkey.query.all()
-    return render_template('index.html',
-                            friends=friends)
+    return render_template('index.html')
 
 
 @monkey_views.route('/search', methods=['GET'])
@@ -58,16 +56,16 @@ def search():
         css_framework='bootstrap3'
     )
     return render_template('search.html',
-                            monkeys=monkeys,
-                            criteria=criteria,
-                            pagination=pagination)
+                           monkeys=monkeys,
+                           criteria=criteria,
+                           pagination=pagination)
 
 
 @monkey_views.route('/monkey/<id>')
 def profile(id, add_friends=False):
     monkey = Monkey.query.filter_by(id=id).scalar()
-    if monkey == None:
-       return abort(404)
+    if monkey is None:
+        return abort(404)
     page = int(request.args.get('page', 1))
     if add_friends:
         friends = monkey.non_friends()
@@ -114,7 +112,7 @@ def create_monkey():
         flash('Monkey created!')
         return redirect(url_for('monkey_views.profile', id=monkey.id))
     return render_template('create.html',
-                            form=form)
+                           form=form)
 
 
 @monkey_views.route('/edit/<id>', methods=['GET', 'POST'])
@@ -134,8 +132,8 @@ def edit_monkey(id):
         form.age.data = monkey.age
         form.email.data = monkey.email
     return render_template('edit.html',
-                            form=form,
-                            monkey=monkey)
+                           form=form,
+                           monkey=monkey)
 
 
 @monkey_views.route('/delete/<id>')

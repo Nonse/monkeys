@@ -1,16 +1,51 @@
 from hashlib import md5
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
-from flask.ext.sqlalchemy import SQLAlchemy
+
+from flask.ext.sqlalchemy import SQLAlchemy, SignallingSession, SessionBase
 
 
-db = SQLAlchemy()
+# Make rollback work correcly in tests
+# https://gist.github.com/alexmic/7857543
+class _SignallingSession(SignallingSession):
+    """A subclass of `SignallingSession` that allows for `binds` to be
+    specified in the `options` keyword arguments."""
+    def __init__(self, db, autocommit=False, autoflush=True, **options):
+        self.app = db.get_app()
+        self._model_changes = {}
+        self.emit_modification_signals = \
+            self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS']
+
+        bind = options.pop('bind', None)
+        if bind is None:
+            bind = db.engine
+
+        binds = options.pop('binds', None)
+        if binds is None:
+            binds = db.get_binds(self.app)
+
+        SessionBase.__init__(self,
+                             autocommit=autocommit,
+                             autoflush=autoflush,
+                             bind=bind,
+                             binds=binds,
+                             **options)
 
 
-friendship = db.Table('friendship',
+class _SQLAlchemy(SQLAlchemy):
+    """A subclass of `SQLAlchemy` that uses `_SignallingSession`."""
+    def create_session(self, options):
+        return _SignallingSession(self, **options)
+
+
+db = _SQLAlchemy()
+
+
+friendship = db.Table(
+    'friendship',
     db.Column('monkey', db.Integer, db.ForeignKey('monkey.id')),
     db.Column('friend_of', db.Integer, db.ForeignKey('monkey.id'))
-    )
+)
 
 
 class Monkey(db.Model):
@@ -29,7 +64,8 @@ class Monkey(db.Model):
     best_friend_of = db.relationship(
         'Monkey',
         backref=db.backref('best_friend', remote_side=[id]),
-        lazy='dynamic'
+        lazy='dynamic',
+        post_update=True
     )
     friends = db.relationship(
         'Monkey',
@@ -37,10 +73,11 @@ class Monkey(db.Model):
         primaryjoin=(friendship.c.monkey == id),
         secondaryjoin=(friendship.c.friend_of == id),
         backref=db.backref('friends_of', lazy='dynamic'),
-        lazy='dynamic'
+        lazy='dynamic',
+        post_update=True
     )
 
-    def __repr__(self): #this method is used for debugging
+    def __repr__(self):
         return '<Monkey {}>'.format(self.name)
 
     def avatar(self, size):
@@ -100,7 +137,7 @@ class Monkey(db.Model):
             func.count(friendship.c.monkey).label('friend_count')
         ).outerjoin(
             friendship,
-            Monkey.id==friendship.c.monkey
+            Monkey.id == friendship.c.monkey
         ).group_by(Monkey)
         return monkeys
 

@@ -6,10 +6,9 @@ from monkeygod.models import db
 
 
 def clear_db():
-    monkeys = models.Monkey.query.all()
-    for monkey in monkeys:
+    for monkey in models.Monkey.query:
         db.session.delete(monkey)
-        db.session.commit()
+    db.session.commit()
 
 
 def insert_data():
@@ -33,8 +32,9 @@ def insert_data():
                 monkey.add_best_friend(friend)
             else:
                 monkey.add_friend(friend)
-        db.session.add_all(monkeys)
-        db.session.commit()
+
+    db.session.add_all(monkeys)
+    db.session.commit()
 
 
 if __name__ == '__main__':
