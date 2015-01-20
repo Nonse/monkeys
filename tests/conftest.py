@@ -6,7 +6,7 @@ from monkeygod import create_app, models
 from monkeygod.models import db as _db
 
 
-TEST_DATABASE_URI = 'sqlite://'
+TEST_DATABASE_URI = 'postgresql://postgres:postgres@localhost/test_monkeydb'
 
 
 # Adapted from http://goo.gl/KXDq2p
@@ -96,6 +96,18 @@ def testdata_with_friends(session, testdata, request):
                 monkey.add_best_friend(friend)
             else:
                 monkey.add_friend(friend)
+
+    session.add_all(monkeys)
+    session.commit()
+
+
+@pytest.fixture(scope='function')
+def testdata_with_many_friends(session, testdata, request):
+    monkeys = models.Monkey.query.all()
+    for monkey in monkeys:
+        friends = random.sample(monkeys, 20)
+        for friend in friends:
+            monkey.add_friend(friend)
 
     session.add_all(monkeys)
     session.commit()
