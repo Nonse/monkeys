@@ -11,6 +11,11 @@ from config import MONKEYS_PER_PAGE
 monkey_views = Blueprint('monkey_views', __name__, static_folder='static')
 
 
+@monkey_views.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
 @monkey_views.route('/')
 def index():
     return render_template('index.html')
@@ -92,11 +97,6 @@ def profile(id, add_friends=False):
 @monkey_views.route('/monkey/<id>/add_friends')
 def profile_add_friend(id):
     return profile(id, add_friends=True)
-
-
-@monkey_views.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
 
 
 @monkey_views.route('/create', methods=['GET', 'POST'])

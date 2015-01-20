@@ -44,7 +44,7 @@ def test_search_criteria(app, testdata_with_friends):
             )
 
 
-def test_profile_basic(app, testdata_with_many_friends, session):
+def test_profile(app, testdata_with_many_friends, session):
     with app.test_client() as client:
         monkey = models.Monkey.query.first()
         res = client.get(url_for('monkey_views.profile',
@@ -58,7 +58,7 @@ def test_profile_basic(app, testdata_with_many_friends, session):
         assert res.status_code == 404, 'Wrong page gives 404'
 
 
-def test_profile_add_friend(app, testdata_with_many_friends, session):
+def test_profile_add_friend(app, testdata, session):
     with app.test_client() as client:
         monkey = models.Monkey.query.first()
         res = client.get(url_for('monkey_views.profile_add_friend',
@@ -67,7 +67,10 @@ def test_profile_add_friend(app, testdata_with_many_friends, session):
 
         res = client.get(url_for('monkey_views.profile_add_friend',
                                  id=monkey.id, page=2))
-        assert res.status_code == 404, 'No friends to add'
+        assert res.status_code == 200, 'Correct page works'
+        res = client.get(url_for('monkey_views.profile_add_friend',
+                                 id=monkey.id, page=10))
+        assert res.status_code == 404, 'Wrong page gives 404'
 
 
 def test_create_monkey(app, session):
@@ -177,13 +180,11 @@ def test_unfriend(app, testdata, session):
 def test_add_bf(app, testdata, session):
     with app.test_client() as client:
         monkey1, monkey2 = models.Monkey.query[:2]
-        monkey1.add_best_friend(monkey2)
-        session.add_all([monkey1, monkey2])
-        session.commit()
         res = client.get(url_for('monkey_views.add_bf',
                                  id=monkey1.id,
                                  friend_id=monkey2.id))
         assert res.status_code == 302, 'Redirects correctly'
+        assert monkey1.best_friend == monkey2, 'Monkeys are best friends'
 
 
 def test_remove_bf(app, testdata, session):
@@ -192,8 +193,6 @@ def test_remove_bf(app, testdata, session):
         monkey1.add_best_friend(monkey2)
         session.add_all([monkey1, monkey2])
         session.commit()
-        monkey1.best_friend = None
-        session.add(monkey1)
-        session.commit()
         res = client.get(url_for('monkey_views.remove_bf', id=monkey1.id))
         assert res.status_code == 302, 'Redirects correctly'
+        assert monkey1.best_friend != monkey2, 'Monkeys are not best friends'

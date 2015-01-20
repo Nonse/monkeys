@@ -2,6 +2,51 @@ import random
 from monkeygod import models
 
 
+def test_avatar(session):
+    """Gravatar URL should be generated"""
+    m1 = models.Monkey(
+        name='monkey1',
+        age=10,
+        email='monkey1@example.com'
+    )
+    session.add(m1)
+    session.commit()
+    avatar = m1.avatar(128)
+    expected = (
+        'http://www.gravatar.com/avatar/90cab8a06b72c3ea49d7a09192b43166'
+        )
+    assert avatar[0:len(expected)] == expected
+
+
+def test_is_friend(session):
+    m1 = models.Monkey(
+        name='monkey1',
+        age=10,
+        email='monkey1@example.com'
+    )
+    m2 = models.Monkey(
+        name='monkey2',
+        age=20,
+        email='monkey2@example.com'
+    )
+    m3 = models.Monkey(
+        name='monkey3',
+        age=30,
+        email='monkey3@example.com'
+    )
+    session.add_all([m1, m2, m3])
+    session.commit()
+    m1.friends.append(m2)
+    m2.friends.append(m1)
+    session.add_all([m1, m2])
+    session.commit()
+
+    assert m1.is_friend(m2) is True
+    assert m2.is_friend(m1) is True
+    assert m2.is_friend(m3) is False
+    assert m3.is_friend(m2) is False
+
+
 def test_friends(session):
     """Database test to ensure a monkey can add/delete friends"""
     m1 = models.Monkey(
@@ -123,48 +168,6 @@ def test_best_friends(session):
     assert m1.best_friend is None, 'Deleting from friends also clears best'
 
 
-def test_avatar(session):
-    """Gravatar URL should be generated"""
-    m1 = models.Monkey(
-        name='monkey1',
-        age=10,
-        email='monkey1@example.com'
-    )
-    session.add(m1)
-    session.commit()
-    avatar = m1.avatar(128)
-    expected = (
-        'http://www.gravatar.com/avatar/90cab8a06b72c3ea49d7a09192b43166'
-        )
-    assert avatar[0:len(expected)] == expected
-
-
-def test_is_friend(session):
-    m1 = models.Monkey(
-        name='monkey1',
-        age=10,
-        email='monkey1@example.com'
-    )
-    m2 = models.Monkey(
-        name='monkey2',
-        age=20,
-        email='monkey2@example.com'
-    )
-    m3 = models.Monkey(
-        name='monkey3',
-        age=30,
-        email='monkey3@example.com'
-    )
-    session.add_all([m1, m2, m3])
-    session.commit()
-    m1.add_friend(m2)
-    session.add_all([m1, m2])
-    session.commit()
-
-    assert m1.is_friend(m2) is True
-    assert m3.is_friend(m2) is False
-
-
 def test_friends_without_best(session):
     m1 = models.Monkey(
         name='monkey1',
@@ -184,13 +187,19 @@ def test_friends_without_best(session):
     session.add_all([m1, m2, m3])
     session.commit()
     m1.add_friend(m2)
-    m1.add_friend(m3)
+    m1.add_best_friend(m3)
     session.add_all([m1, m2, m3])
     session.commit()
 
     no_bf_friends = m1.friends_without_best()
     for friend in no_bf_friends:
-        assert friend.best_friend_of != m1
+        assert m1.best_friend != friend
+    assert (m1.friends.count() - no_bf_friends.count()) == 1, (
+        'All friends but best'
+    )
+    assert m2.friends.count() == m2.friends_without_best().count(), (
+        'Without best friend lists are the same'
+    )
 
 
 def test_non_friends(session):
@@ -217,3 +226,6 @@ def test_non_friends(session):
 
     others = m1.non_friends()
     assert others.count() == 1, 'Lists one not added friend'
+
+    for monkey in others:
+        assert not m1.is_friend(monkey), 'Monkeys are not friends'
