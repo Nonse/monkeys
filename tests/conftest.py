@@ -1,7 +1,7 @@
 import os
 import pytest
 import random
-
+import config
 from monkeygod import create_app, models
 from monkeygod.models import db as _db
 
@@ -13,11 +13,11 @@ TEST_DATABASE_URI = 'sqlite://'
 @pytest.fixture(scope='session')
 def app(request):
     """Session-wide test `Flask` application."""
-    settings_override = {
-        'TESTING': True,
-        'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URI
-    }
-    app = create_app(settings_override)
+    config.TESTING = True
+    config.SQLALCHEMY_DATABASE_URI = TEST_DATABASE_URI
+    config.CSRF_ENABLED = False
+    config.WTF_CSRF_ENABLED = False
+    app = create_app(config)
 
     # Establish an application context before running the tests.
     context = app.app_context()
