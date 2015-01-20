@@ -44,6 +44,32 @@ def test_search_criteria(app, testdata_with_friends):
             )
 
 
+def test_profile_basic(app, testdata_with_many_friends, session):
+    with app.test_client() as client:
+        monkey = models.Monkey.query.first()
+        res = client.get(url_for('monkey_views.profile',
+                                 id=monkey.id))
+        assert res.status_code == 200, 'Correct view shown'
+        res = client.get(url_for('monkey_views.profile',
+                                 id=monkey.id, page=2))
+        assert res.status_code == 200, 'Correct page works'
+        res = client.get(url_for('monkey_views.profile',
+                                 id=monkey.id, page=10))
+        assert res.status_code == 404, 'Wrong page gives 404'
+
+
+def test_profile_add_friend(app, testdata_with_many_friends, session):
+    with app.test_client() as client:
+        monkey = models.Monkey.query.first()
+        res = client.get(url_for('monkey_views.profile_add_friend',
+                                 id=monkey.id))
+        assert res.status_code == 200, 'Correct view shown'
+
+        res = client.get(url_for('monkey_views.profile_add_friend',
+                                 id=monkey.id, page=2))
+        assert res.status_code == 404, 'No friends to add'
+
+
 def test_create_monkey(app, session):
     with app.test_client() as client:
         res = client.get(url_for('monkey_views.create_monkey'))
@@ -109,20 +135,18 @@ def test_edit_monkey(app, session):
         assert monkey.email == 'monkey@example.fi', 'Email not changed'
 
 
-# def test_delete_monkey(app, session):
-#     with app.test_client() as client:
-#         monkey = models.Monkey(
-#             name='monkey',
-#             age=11,
-#             email='monkey@example.com'
-#         )
-#         session.add(monkey)
-#         session.commit()
-#         session.delete(monkey)
-#         session.commit()
-#         res = client.get(url_for('monkey_views.delete_monkey', id=monkey.id))
-#         print(res.data)
-#         assert res.status_code == 302, 'Redirects correctly'
+def test_delete_monkey(app, session):
+    with app.test_client() as client:
+        monkey = models.Monkey(
+            name='monkey',
+            age=11,
+            email='monkey@example.com'
+        )
+        session.add(monkey)
+        session.commit()
+        res = client.get(url_for('monkey_views.delete_monkey', id=monkey.id))
+        assert res.status_code == 302, 'Redirects correctly'
+        assert models.Monkey.query.count() == 0, 'Monkey deleted successfully'
 
 
 def test_add_friend(app, testdata, session):

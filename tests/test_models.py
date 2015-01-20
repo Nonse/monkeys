@@ -137,3 +137,83 @@ def test_avatar(session):
         'http://www.gravatar.com/avatar/90cab8a06b72c3ea49d7a09192b43166'
         )
     assert avatar[0:len(expected)] == expected
+
+
+def test_is_friend(session):
+    m1 = models.Monkey(
+        name='monkey1',
+        age=10,
+        email='monkey1@example.com'
+    )
+    m2 = models.Monkey(
+        name='monkey2',
+        age=20,
+        email='monkey2@example.com'
+    )
+    m3 = models.Monkey(
+        name='monkey3',
+        age=30,
+        email='monkey3@example.com'
+    )
+    session.add_all([m1, m2, m3])
+    session.commit()
+    m1.add_friend(m2)
+    session.add_all([m1, m2])
+    session.commit()
+
+    assert m1.is_friend(m2) is True
+    assert m3.is_friend(m2) is False
+
+
+def test_friends_without_best(session):
+    m1 = models.Monkey(
+        name='monkey1',
+        age=10,
+        email='monkey1@example.com'
+    )
+    m2 = models.Monkey(
+        name='monkey2',
+        age=20,
+        email='monkey2@example.com'
+    )
+    m3 = models.Monkey(
+        name='monkey3',
+        age=30,
+        email='monkey3@example.com'
+    )
+    session.add_all([m1, m2, m3])
+    session.commit()
+    m1.add_friend(m2)
+    m1.add_friend(m3)
+    session.add_all([m1, m2, m3])
+    session.commit()
+
+    no_bf_friends = m1.friends_without_best()
+    for friend in no_bf_friends:
+        assert friend.best_friend_of != m1
+
+
+def test_non_friends(session):
+    m1 = models.Monkey(
+        name='monkey1',
+        age=10,
+        email='monkey1@example.com'
+    )
+    m2 = models.Monkey(
+        name='monkey2',
+        age=20,
+        email='monkey2@example.com'
+    )
+    m3 = models.Monkey(
+        name='monkey3',
+        age=30,
+        email='monkey3@example.com'
+    )
+    session.add_all([m1, m2, m3])
+    session.commit()
+    m1.add_friend(m2)
+    session.add_all([m1, m2])
+    session.commit()
+
+    others = m1.non_friends()
+    assert others.count() == 1, 'Lists one not added friend'
